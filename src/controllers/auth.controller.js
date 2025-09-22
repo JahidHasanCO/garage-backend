@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
+import Roll from "../models/roll.model.js";
 import jwt from "jsonwebtoken";
 
 // Signup function
@@ -14,12 +15,14 @@ export const signup = async (req, res) => {
     }
 
     // 2. Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // const hashedPassword = await bcrypt.hash(password, 10);
 
     // 3. Create user
     const user = await User.create({
+      name: "John Doe",
       email,
-      password: hashedPassword,
+      password: password,
+      roll_id: "68d0dcc55298f2df0e156757"
     });
 
     res.status(201).json({ message: "User created successfully", userId: user._id });
@@ -29,34 +32,41 @@ export const signup = async (req, res) => {
   }
 };
 
-export const login = async (req, res) => {
+export const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    console.log(email, password);
 
     // 1. Find user
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ error: "Invalid Email" });
 
     // 2. Compare password
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = password === user.password;
     if (!isMatch) return res.status(400).json({ error: "Invalid Password" });
+
+    const roll = await Roll.findById(user.roll_id);
+    if (!roll || roll.title !== "admin") {
+      return res.status(403).json({ error: "Access denied. Not an admin." });
+    }
 
     // 3. Generate tokens
     const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "15m" });
     const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
 
     // 4. Store refresh token in DB
-    user.refreshToken = refreshToken;
+    user.refresh_token = refreshToken;
     await user.save();
 
     // 5. Send tokens (access token in response, refresh in httpOnly cookie)
-    res.cookie("refreshToken", refreshToken, {
+    res.cookie("refresh_token", refreshToken, {
       httpOnly: true,
       secure: false, // change to true in production (HTTPS)
       sameSite: "strict",
     });
 
-    res.json({ accessToken });
+    res.json({ accessToken, user });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });

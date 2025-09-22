@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
   email: {
     type: String,
     required: true,
@@ -11,9 +15,13 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  refreshToken: {
+  refresh_token: {
     type: String,
     default: null,
+  },
+  roll_id: {
+    type: String,
+    required: true,
   },
 }, { timestamps: true }); // optional, adds createdAt & updatedAt
 
