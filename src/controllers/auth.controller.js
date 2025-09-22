@@ -1,36 +1,42 @@
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
-import Roll from "../models/roll.model.js";
+import Role from "../models/role.model.js";
 import jwt from "jsonwebtoken";
 
-// Signup function
-export const signup = async (req, res) => {
+export const adminSignup = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { name, email, password } = req.body;
 
     // 1. Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ error: "User already exists" });
+      return res.status(400).json({ error: "Admin already exists" });
     }
 
     // 2. Hash password
-    // const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
+    const adminRole = await Role.findOne({ value: "admin" });
+
+    if (!adminRole) {
+      return res.status(500).json({ error: "Admin role not found" });
+    }
+    
     // 3. Create user
     const user = await User.create({
-      name: "John Doe",
+      name,
       email,
-      password: password,
-      roll_id: "68d0dcc55298f2df0e156757"
+      password: hashedPassword,
+      role_id: adminRole._id
     });
 
-    res.status(201).json({ message: "User created successfully", userId: user._id });
+    res.status(201).json({ message: "Admin created successfully", userId: user._id });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
   }
 };
+
 
 export const adminLogin = async (req, res) => {
   try {
@@ -42,12 +48,16 @@ export const adminLogin = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ error: "Invalid Email" });
 
+    console.log(user);
+
     // 2. Compare password
-    const isMatch = password === user.password;
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ error: "Invalid Password" });
 
-    const roll = await Roll.findById(user.roll_id);
-    if (!roll || roll.title !== "admin") {
+    const role = await Role.findOne({ _id: user.role_id });
+    console.log(role);
+
+    if (!role || role.value !== "admin") {
       return res.status(403).json({ error: "Access denied. Not an admin." });
     }
 
