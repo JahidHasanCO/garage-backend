@@ -77,7 +77,28 @@ const options = {
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' },
           },
-        }
+        },
+        Vehicle: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string', example: '6510bcde1234ef567890bcdf' },
+            customer_id: { type: 'string', example: '651045bc9b1a3c2d4e8f1234' },
+            make: { type: 'string', example: 'Toyota' },
+            model: { type: 'string', example: 'Corolla' },
+            year: { type: 'integer', example: 2022 },
+            vin: { type: 'string', example: '1HGCM82633A123456' },
+            license_plate: { type: 'string', example: 'DHA-1234' },
+            color: { type: 'string', example: 'Black' },
+            mileage: { type: 'number', example: 45200 },
+            fuel_type: { type: 'string', enum: ['petrol', 'diesel', 'cng', 'electric', 'hybrid'], example: 'petrol' },
+            transmission: { type: 'string', enum: ['manual', 'automatic', 'cvt', 'semi-automatic'], example: 'automatic' },
+            last_service_date: { type: 'string', format: 'date-time', example: '2025-01-15T10:30:00.000Z' },
+            next_service_due: { type: 'string', format: 'date-time', example: '2025-07-15T10:30:00.000Z' },
+            notes: { type: 'string', example: 'Customer requested synthetic oil only' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+        },
       }
     },
     security: [{ bearerAuth: [] }]

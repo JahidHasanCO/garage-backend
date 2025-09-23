@@ -7,6 +7,7 @@ import cors from "cors";
 import authRoutes from "./routes/auth.routes.js";
 import customerAuthRoutes from "./routes/customer.auth.routes.js";
 import roleRoutes from "./routes/role.routes.js";
+import vehicleRoutes from "./routes/vehicle.routes.js";
 import permissionRoutes from "./routes/permission.routes.js";
 import serviceRoutes from "./routes/service_catalog.routes.js";
 import { connectDB } from "./config/db.js";
@@ -29,6 +30,7 @@ app.use(cookieParser());
 app.use("/auth", authRoutes);
 app.use("/customer", customerAuthRoutes);
 app.use("/roles", roleRoutes);
+app.use("/vehicles", vehicleRoutes);
 app.use("/permissions", permissionRoutes);
 app.use("/services", serviceRoutes);
 
