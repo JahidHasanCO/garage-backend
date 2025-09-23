@@ -10,7 +10,7 @@ const options = {
       description: 'API documentation for Garage Car Repair System',
     },
     servers: [
-      { url: 'http://localhost:5000', description: 'Development server' }
+      { url: 'https://garage-ucu3.onrender.com/', description: 'Production server' }
     ],
     components: {
       securitySchemes: {
