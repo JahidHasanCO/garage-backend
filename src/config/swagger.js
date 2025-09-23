@@ -54,11 +54,25 @@ const options = {
             updatedAt: { type: 'string', format: 'date-time' },
           },
         },
+        ServiceCatalog: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string', example: '6510abcd1234ef567890abcd' },
+            name: { type: 'string', example: 'Oil Change' },
+            description: { type: 'string', example: 'Complete engine oil replacement' },
+            price: { type: 'number', example: 50 },
+            estimated_time: { type: 'number', example: 30 },
+            image: { type: 'string', example: 'https://example.com/images/oil-change.jpg' },
+            discount: { type: 'number', example: 10 },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+        }
       }
     },
     security: [{ bearerAuth: [] }]
   },
-  apis: ["./src/routes/*.js"], 
+  apis: ["./src/routes/*.js"],
 };
 
 const swaggerSpec = swaggerJSDoc(options);
