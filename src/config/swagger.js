@@ -19,6 +19,41 @@ const options = {
           scheme: 'bearer',
           bearerFormat: 'JWT'
         }
+      },
+      schemas: {
+        Role: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string', example: '650f2a1e5a6c3f4a2c9b1234' },
+            title: { type: 'string', example: 'Administrator' },
+            value: { type: 'string', example: 'admin' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        Permission: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string', example: '65102f3c8b4a1c7d4a9e1234' },
+            title: { type: 'string', example: 'View Dashboard' },
+            value: { type: 'string', example: 'view_dashboard' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        User: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string', example: '651045bc9b1a3c2d4e8f1234' },
+            name: { type: 'string', example: 'John Doe' },
+            email: { type: 'string', example: 'john.doe@example.com' },
+            password: { type: 'string', example: '$2b$10$hashedpassword' },
+            refresh_token: { type: 'string', nullable: true },
+            role_id: { type: 'string', example: '650f2a1e5a6c3f4a2c9b1234' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+        },
       }
     },
     security: [{ bearerAuth: [] }]
