@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import authRoutes from "./routes/auth.routes.js";
 import roleRoutes from "./routes/role.routes.js";
+import permissionRoutes from "./routes/permission.routes.js";
 import { connectDB } from "./config/db.js";
 import setupSwagger from './config/swagger.js';
 
@@ -26,6 +27,7 @@ app.use(
 // Routes
 app.use("/auth", authRoutes);
 app.use("/roles", roleRoutes);
+app.use("/permissions", permissionRoutes);
 
 setupSwagger(app);
 
