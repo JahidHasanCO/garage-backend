@@ -1,11 +1,24 @@
 import ServiceCatalog from "../models/service_catalog.model.js";
 import { uploadToCloudinary } from "../utils/helpers/cloudinary_upload.js";
 
-// Get all services
-export const getAllServices = async (_req, res) => {
+// Get all services with pagination
+export const getAllServices = async (req, res) => {
   try {
-    const services = await ServiceCatalog.find();
-    res.json(services);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const [services, total] = await Promise.all([
+      ServiceCatalog.find().skip(skip).limit(limit),
+      ServiceCatalog.countDocuments()
+    ]);
+
+    res.json({
+      services,
+      total,
+      page,
+      pages: Math.ceil(total / limit)
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });

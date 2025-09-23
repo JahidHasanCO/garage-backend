@@ -36,9 +36,23 @@ router.use(authenticate);
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/ServiceCatalog'
+ *               type: object
+ *               properties:
+ *                 services:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/ServiceCatalog'
+ *                 total:
+ *                   type: integer
+ *                   description: Total number of services
+ *                 page:
+ *                   type: integer
+ *                   description: Current page number
+ *                 pages:
+ *                   type: integer
+ *                   description: Total number of pages
+ *       401:
+ *         description: Unauthorized
  */
 router.get("/", getAllServices);
 
