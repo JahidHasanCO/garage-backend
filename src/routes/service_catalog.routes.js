@@ -7,6 +7,10 @@ import {
   deleteService,
 } from "../controllers/service_catalog.controller.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
+import multer from "multer";
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 const router = express.Router();
 
@@ -67,12 +71,12 @@ router.get("/:id", getServiceById);
  * @swagger
  * /services:
  *   post:
- *     summary: Create a new service
+ *     summary: Create a new service (with optional image upload)
  *     tags: [Services]
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -84,10 +88,11 @@ router.get("/:id", getServiceById);
  *                 type: number
  *               estimated_time:
  *                 type: number
- *               image:
- *                 type: string
  *               discount:
  *                 type: number
+ *               image:
+ *                 type: string
+ *                 format: binary
  *             required:
  *               - name
  *               - price
@@ -102,13 +107,13 @@ router.get("/:id", getServiceById);
  *       400:
  *         description: Bad request
  */
-router.post("/", createService);
+router.post("/", upload.single("image"), createService);
 
 /**
  * @swagger
  * /services/{id}:
  *   put:
- *     summary: Update a service by ID
+ *     summary: Update a service by ID (with optional image upload)
  *     tags: [Services]
  *     parameters:
  *       - in: path
@@ -120,7 +125,7 @@ router.post("/", createService);
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -132,10 +137,11 @@ router.post("/", createService);
  *                 type: number
  *               estimated_time:
  *                 type: number
- *               image:
- *                 type: string
  *               discount:
  *                 type: number
+ *               image:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
  *         description: Service updated
@@ -146,7 +152,8 @@ router.post("/", createService);
  *       404:
  *         description: Service not found
  */
-router.put("/:id", updateService);
+router.put("/:id", upload.single("image"), updateService);
+
 
 /**
  * @swagger
