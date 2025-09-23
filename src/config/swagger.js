@@ -67,6 +67,16 @@ const options = {
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' },
           },
+        },
+        Customer: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string', example: '6510bcde1234ef567890bcde' },
+            address: { type: 'string', example: '123 Main St, Springfield' },
+            user_id: { type: 'string', example: '651045bc9b1a3c2d4e8f1234' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
         }
       }
     },
