@@ -99,6 +99,25 @@ const options = {
             updatedAt: { type: 'string', format: 'date-time' },
           },
         },
+        Booking: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string', example: '64f8c2d9a6e6a5f1a8a8d123' },
+            customer_id: { type: 'string', example: '64f8c1f0a6e6a5f1a8a8d111' },
+            vehicle_id: { type: 'string', example: '64f8c1f0a6e6a5f1a8a8d112' },
+            service_id: { type: 'string', example: '64f8c1f0a6e6a5f1a8a8d113' },
+            booking_date: { type: 'string', format: 'date-time', example: '2025-10-01T10:00:00Z' },
+            status: {
+              type: 'string',
+              enum: ['pending', 'confirmed', 'completed', 'cancelled'],
+              default: 'pending',
+              example: 'pending'
+            },
+            notes: { type: 'string', example: 'Customer requested pickup' },
+            createdAt: { type: 'string', format: 'date-time', example: '2025-09-24T10:00:00Z' },
+            updatedAt: { type: 'string', format: 'date-time', example: '2025-09-24T10:00:00Z' },
+          },
+        },
       }
     },
     security: [{ bearerAuth: [] }]

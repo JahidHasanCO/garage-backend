@@ -10,6 +10,7 @@ import roleRoutes from "./routes/role.routes.js";
 import vehicleRoutes from "./routes/vehicle.routes.js";
 import permissionRoutes from "./routes/permission.routes.js";
 import serviceRoutes from "./routes/service_catalog.routes.js";
+import bookingRoutes from "./routes/booking.routes.js";
 import { connectDB } from "./config/db.js";
 import setupSwagger from './config/swagger.js';
 
@@ -33,6 +34,7 @@ app.use("/roles", roleRoutes);
 app.use("/vehicles", vehicleRoutes);
 app.use("/permissions", permissionRoutes);
 app.use("/services", serviceRoutes);
+app.use("/bookings", bookingRoutes);
 
 setupSwagger(app);
 

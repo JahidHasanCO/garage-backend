@@ -21,7 +21,7 @@ export const adminSignup = async (req, res) => {
     if (!adminRole) {
       return res.status(500).json({ error: "Admin role not found" });
     }
-    
+
     // 3. Create user
     const user = await User.create({
       name,
@@ -61,9 +61,9 @@ export const adminLogin = async (req, res) => {
       return res.status(403).json({ error: "Access denied. Not an admin." });
     }
 
-    // 3. Generate tokens
-    const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "15m" });
-    const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
+    const payload = { id: user._id, role_id: user.role_id, role: role.value };
+    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "15m" });
+    const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
 
     // 4. Store refresh token in DB
     user.refresh_token = refreshToken;
@@ -92,11 +92,19 @@ export const refreshToken = async (req, res) => {
     const user = await User.findOne({ refreshToken: token });
     if (!user) return res.status(403).json({ error: "Invalid refresh token" });
 
+    const role = await Role.findOne({ _id: user.role_id });
+    console.log(role);
+
+    if (!role || role.value !== "admin") {
+      return res.status(403).json({ error: "Access denied. Not an admin." });
+    }
+
     // Verify refresh token
     const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
 
     // Generate new access token
-    const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "15m" });
+    const payload = { id: user._id, role_id: user.role_id, role: role.value };
+    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "15m" });
 
     res.json({ accessToken });
   } catch (err) {

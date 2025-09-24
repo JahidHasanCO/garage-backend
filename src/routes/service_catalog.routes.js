@@ -7,6 +7,7 @@ import {
   deleteService,
 } from "../controllers/service_catalog.controller.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
+import { authorize } from "../middlewares/authorize.middleware.js";
 import multer from "multer";
 
 const storage = multer.memoryStorage();
@@ -121,7 +122,7 @@ router.get("/:id", getServiceById);
  *       400:
  *         description: Bad request
  */
-router.post("/", upload.single("image"), createService);
+router.post("/", authenticate, authorize(["admin"]), upload.single("image"), createService);
 
 /**
  * @swagger
@@ -166,7 +167,7 @@ router.post("/", upload.single("image"), createService);
  *       404:
  *         description: Service not found
  */
-router.put("/:id", upload.single("image"), updateService);
+router.put("/:id", authenticate, authorize(["admin"]), upload.single("image"), updateService);
 
 
 /**
@@ -188,6 +189,6 @@ router.put("/:id", upload.single("image"), updateService);
  *       404:
  *         description: Service not found
  */
-router.delete("/:id", deleteService);
+router.delete("/:id", authenticate, authorize(["admin"]), deleteService);
 
 export default router;

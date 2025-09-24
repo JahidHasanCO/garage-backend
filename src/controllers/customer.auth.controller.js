@@ -71,8 +71,9 @@ export const login = async (req, res) => {
     const profile = await Customer.findOne({ user_id: user._id });
 
     // 3. Generate tokens
-    const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "15m" });
-    const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
+    const payload = { id: user._id, role_id: user.role_id, role: role.value };
+    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "15m" });
+    const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
 
     // 4. Store refresh token in DB
     user.refresh_token = refreshToken;
