@@ -1,4 +1,5 @@
 import Booking from "../models/booking.model.js";
+import Customer from "../models/customer.model.js";
 
 // Get my bookings
 export const getMyBookings = async (req, res) => {
@@ -7,9 +8,13 @@ export const getMyBookings = async (req, res) => {
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
 
+        const customer = await Customer.findOne({ user_id: req.user.id });
+
+        if (!customer) return res.status(404).json({ error: "Customer not found" });
+
         const [bookings, total] = await Promise.all([
-            Booking.find({ customer_id: req.user.id }).skip(skip).limit(limit),
-            Booking.countDocuments({ customer_id: req.user.id })
+            Booking.find({ customer_id: customer._id }).skip(skip).limit(limit),
+            Booking.countDocuments({ customer_id: customer._id })
         ]);
 
         res.json({
