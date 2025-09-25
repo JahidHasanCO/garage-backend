@@ -10,7 +10,9 @@ import vehicleRoutes from "./routes/vehicle.routes.js";
 import permissionRoutes from "./routes/permission.routes.js";
 import serviceRoutes from "./routes/service_catalog.routes.js";
 import bookingRoutes from "./routes/booking.routes.js";
-import FuelTypeRoutes from "./routes/fuel.type.routes.js";
+import fuelTypeRoutes from "./routes/fuel.type.routes.js";
+import manufacturerRoutes from "./routes/manufacturer.routes.js";
+
 import { connectDB } from "./config/db.js";
 
 const app = express();
@@ -33,7 +35,8 @@ app.use("/vehicles", vehicleRoutes);
 app.use("/permissions", permissionRoutes);
 app.use("/services", serviceRoutes);
 app.use("/bookings", bookingRoutes);
-app.use("/fuel-types", FuelTypeRoutes);
+app.use("/fuel-types", fuelTypeRoutes);
+app.use("/manufacturers", manufacturerRoutes);
 
 connectDB().then(() => {
   app.listen(process.env.PORT, () => {

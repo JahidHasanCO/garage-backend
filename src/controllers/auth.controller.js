@@ -69,7 +69,7 @@ export const login = async (req, res) => {
 
     // 3. Generate tokens
     const payload = { id: user._id, role_id: user.role_id, role: role.value };
-    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "15m" });
+    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
     const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
 
     // 4. Store refresh token in DB
@@ -150,7 +150,7 @@ export const adminLogin = async (req, res) => {
     }
 
     const payload = { id: user._id, role_id: user.role_id, role: role.value };
-    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "15m" });
+    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
     const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
 
     // 4. Store refresh token in DB
@@ -192,7 +192,7 @@ export const refreshToken = async (req, res) => {
 
     // Generate new access token
     const payload = { id: user._id, role_id: user.role_id, role: role.value };
-    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "15m" });
+    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
 
     res.json({ accessToken });
   } catch (err) {
