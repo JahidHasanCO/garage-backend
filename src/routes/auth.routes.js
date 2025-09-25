@@ -9,8 +9,8 @@ router.post("/signup", signupValidator, validate, signup);
 
 router.post("/login", loginValidator, validate, login);
 
-router.post("/admin/signup", adminSignup);
-router.post("/admin/login", adminLogin);
+router.post("/admin/signup", signupValidator, validate, adminSignup);
+router.post("/admin/login", loginValidator, validate, adminLogin);
 router.get("/refresh-token", refreshToken);
 
 export default router;
