@@ -1,117 +1,160 @@
 import Vehicle from "../models/vehicle.model.js";
+import { uploadToCloudinary } from "../utils/helpers/cloudinary_upload.js";
 
-// Get all vehicles
-export const getAllVehicles = async (req, res) => {
-    try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const skip = (page - 1) * limit;
-
-        const [vehicles, total] = await Promise.all([
-            Vehicle.find()
-                .populate("customer_id", "address user_id")
-                .skip(skip)
-                .limit(limit),
-            Vehicle.countDocuments()
-        ]);
-
-        res.json({
-            vehicles,
-            total,
-            page,
-            pages: Math.ceil(total / limit)
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error" });
-    }
-};
-
-// Get vehicle by ID
-export const getVehicleById = async (req, res) => {
-    try {
-        const vehicle = await Vehicle.findById(req.params.id).populate("customer_id", "address user_id");
-        if (!vehicle) return res.status(404).json({ error: "Vehicle not found" });
-        res.json(vehicle);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error" });
-    }
-};
-
-// Create new vehicle
+// Create a new Vehicle
 export const createVehicle = async (req, res) => {
-    try {
-        const {
-            customer_id,
-            make,
-            model,
-            year,
-            vin,
-            license_plate,
-            color,
-            mileage,
-            fuel_type,
-            transmission,
-            last_service_date,
-            next_service_due,
-            notes,
-        } = req.body;
+  try {
+    const {
+      manufacturer,
+      model,
+      year,
+      vin,
+      license_plate,
+      color,
+      mileage,
+      fuel_type,
+      transmission,
+      description,
+    } = req.body;
 
-        // Check if VIN already exists
-        if (vin) {
-            const existingVehicle = await Vehicle.findOne({ vin });
-            if (existingVehicle) {
-                return res.status(400).json({ error: "Vehicle with this VIN already exists" });
-            }
-        }
-
-        const newVehicle = new Vehicle({
-            customer_id,
-            make,
-            model,
-            year,
-            vin,
-            license_plate,
-            color,
-            mileage,
-            fuel_type,
-            transmission,
-            last_service_date,
-            next_service_due,
-            notes,
-        });
-
-        await newVehicle.save();
-        res.status(201).json(newVehicle);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error" });
+    // Check unique VIN
+    if (vin) {
+      const existingVin = await Vehicle.findOne({ vin: vin.toUpperCase() });
+      if (existingVin) {
+        return res.status(400).json({ message: "VIN already exists" });
+      }
     }
+
+    // Check unique license plate
+    const existingPlate = await Vehicle.findOne({ license_plate: license_plate.toUpperCase() });
+    if (existingPlate) {
+      return res.status(400).json({ message: "License plate already exists" });
+    }
+
+    // Handle image upload if provided
+    let imageUrl = null;
+    if (req.file) {
+      imageUrl = await uploadToCloudinary(req.file.buffer, "vehicles");
+    }
+
+    const vehicle = new Vehicle({
+      manufacturer,
+      model,
+      year,
+      vin: vin ? vin.toUpperCase() : undefined,
+      license_plate: license_plate.toUpperCase(),
+      color,
+      mileage,
+      fuel_type,
+      transmission,
+      image: imageUrl,
+      description,
+    });
+
+    await vehicle.save();
+    res.status(201).json(vehicle);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
-// Update vehicle by ID
+// Get all Vehicles
+export const getAllVehicles = async (_req, res) => {
+  try {
+    const vehicles = await Vehicle.find()
+      .populate("manufacturer", "name country")
+      .populate("fuel_type", "title value")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(vehicles);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get single Vehicle by ID
+export const getVehicleById = async (req, res) => {
+  try {
+    const vehicle = await Vehicle.findById(req.params.id)
+      .populate("manufacturer", "name country")
+      .populate("fuel_type", "title value");
+
+    if (!vehicle) {
+      return res.status(404).json({ message: "Vehicle not found" });
+    }
+
+    res.status(200).json(vehicle);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Update Vehicle
 export const updateVehicle = async (req, res) => {
-    try {
-        const updates = req.body;
-        const vehicle = await Vehicle.findByIdAndUpdate(req.params.id, updates, { new: true });
-
-        if (!vehicle) return res.status(404).json({ error: "Vehicle not found" });
-        res.json(vehicle);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error" });
+  try {
+    const vehicle = await Vehicle.findById(req.params.id);
+    if (!vehicle) {
+      return res.status(404).json({ message: "Vehicle not found" });
     }
+
+    const {
+      manufacturer,
+      model,
+      year,
+      vin,
+      license_plate,
+      color,
+      mileage,
+      fuel_type,
+      transmission,
+      description,
+    } = req.body;
+
+    // Update VIN if provided and unique
+    if (vin && vin.toUpperCase() !== vehicle.vin) {
+      const existingVin = await Vehicle.findOne({ vin: vin.toUpperCase() });
+      if (existingVin) return res.status(400).json({ message: "VIN already exists" });
+      vehicle.vin = vin.toUpperCase();
+    }
+
+    // Update license plate if provided and unique
+    if (license_plate && license_plate.toUpperCase() !== vehicle.license_plate) {
+      const existingPlate = await Vehicle.findOne({ license_plate: license_plate.toUpperCase() });
+      if (existingPlate) return res.status(400).json({ message: "License plate already exists" });
+      vehicle.license_plate = license_plate.toUpperCase();
+    }
+
+    // Update image if file uploaded
+    if (req.file) {
+      vehicle.image = await uploadToCloudinary(req.file.buffer, "vehicles");
+    }
+
+    // Update other fields
+    if (manufacturer) vehicle.manufacturer = manufacturer;
+    if (model) vehicle.model = model;
+    if (year) vehicle.year = year;
+    if (color) vehicle.color = color;
+    if (mileage !== undefined) vehicle.mileage = mileage;
+    if (fuel_type) vehicle.fuel_type = fuel_type;
+    if (transmission) vehicle.transmission = transmission;
+    if (description !== undefined) vehicle.description = description;
+
+    await vehicle.save();
+    res.status(200).json(vehicle);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
-// Delete vehicle by ID
+// Delete Vehicle by ID
 export const deleteVehicle = async (req, res) => {
-    try {
-        const vehicle = await Vehicle.findByIdAndDelete(req.params.id);
-        if (!vehicle) return res.status(404).json({ error: "Vehicle not found" });
-        res.json({ message: "Vehicle deleted successfully" });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error" });
+  try {
+    const vehicle = await Vehicle.findByIdAndDelete(req.params.id);
+    if (!vehicle) {
+      return res.status(404).json({ message: "Vehicle not found" });
     }
+    res.status(200).json({ message: "Vehicle deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
