@@ -9,7 +9,6 @@ import Customer from "../models/customer.model.js";
 export const signup = async (req, res) => {
   try {
     const { name, email, password, address } = req.body;
-
     // 1. Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -51,13 +50,9 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    console.log(email, password);
-
     // 1. Find user
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ error: "Invalid Email" });
-
-    console.log(user);
 
     // 2. Compare password
     const isMatch = await bcrypt.compare(password, user.password);
