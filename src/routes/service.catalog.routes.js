@@ -5,7 +5,7 @@ import {
   createService,
   updateService,
   deleteService,
-} from "../controllers/service_catalog.controller.js";
+} from "../controllers/service.catalog.controller.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
 import { authorize } from "../middlewares/authorize.middleware.js";
 import { serviceCatalogValidator } from "../validators/service.catalog.validator.js";

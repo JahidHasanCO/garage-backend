@@ -35,10 +35,23 @@ export const createPart = async (req, res) => {
 };
 
 // Get all Parts
-export const getAllParts = async (_req, res) => {
+export const getAllParts = async (req, res) => {
   try {
-    const parts = await Part.find().sort({ createdAt: -1 });
-    res.status(200).json(parts);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const [parts, total] = await Promise.all([
+      Part.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Part.countDocuments()
+    ]);
+
+    res.status(200).json({
+      parts,
+      total,
+      page,
+      pages: Math.ceil(total / limit)
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

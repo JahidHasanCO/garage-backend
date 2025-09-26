@@ -8,10 +8,11 @@ import authRoutes from "./routes/auth.routes.js";
 import roleRoutes from "./routes/role.routes.js";
 import vehicleRoutes from "./routes/vehicle.routes.js";
 import permissionRoutes from "./routes/permission.routes.js";
-import serviceRoutes from "./routes/service_catalog.routes.js";
+import serviceRoutes from "./routes/service.catalog.routes.js";
 import bookingRoutes from "./routes/booking.routes.js";
 import fuelTypeRoutes from "./routes/fuel.type.routes.js";
 import manufacturerRoutes from "./routes/manufacturer.routes.js";
+import partRoutes from "./routes/part.routes.js";
 
 import { connectDB } from "./config/db.js";
 
@@ -20,7 +21,10 @@ const app = express();
 // Middlewares
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: [
+      process.env.CLIENT_URL || "http://localhost:3000",
+      "http://localhost:5173",
+    ],
     credentials: true, // allow cookies / auth headers
   })
 );
@@ -37,6 +41,7 @@ app.use("/services", serviceRoutes);
 app.use("/bookings", bookingRoutes);
 app.use("/fuel-types", fuelTypeRoutes);
 app.use("/manufacturers", manufacturerRoutes);
+app.use("/parts", partRoutes);
 
 connectDB().then(() => {
   app.listen(process.env.PORT, () => {

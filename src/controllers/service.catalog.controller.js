@@ -1,5 +1,5 @@
 import ServiceCatalog from "../models/service.catalog.model.js";
-import Part from "../models/part.js";
+import Part from "../models/part.model.js";
 import { uploadToCloudinary } from "../utils/helpers/cloudinary_upload.js";
 
 // Get all services with pagination, populate parts
