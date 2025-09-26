@@ -16,10 +16,16 @@ const serviceCatalogSchema = new mongoose.Schema({
     min: 0,
   },
   estimated_time: {
-    type: Number, 
+    type: Number,
     required: true,
     min: 0,
   },
+  parts_needed: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Part",
+    }
+  ],
   image: {
     type: String,
     default: "",
