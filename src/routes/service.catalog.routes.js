@@ -25,7 +25,7 @@ router.get("/:id", getServiceById);
 
 // Admin-only endpoints
 router.post("/", authorize(["admin"]), upload.single("image"), createServiceCatalogValidator, createService);
-router.put("/:id", authorize(["admin"]), upload.single("image"), serviceCatalogValidator, updateService);
+router.put("/:id", authorize(["admin"]), upload.single("image"), updateServiceCatalogValidator, updateService);
 router.delete("/:id", authorize(["admin"]), deleteService);
 
 export default router;
