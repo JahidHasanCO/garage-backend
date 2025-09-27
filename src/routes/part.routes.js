@@ -8,7 +8,7 @@ import {
 } from "../controllers/part.controller.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
 import { authorize } from "../middlewares/authorize.middleware.js";
-import { partValidator } from "../validators/part.validator.js"; 
+import { createPartValidator, updatePartValidator } from "../validators/part.validator.js"; 
 import multer from "multer";
 
 const storage = multer.memoryStorage();
@@ -22,7 +22,7 @@ router.post(
   authenticate,
   authorize("admin"),
   upload.single("image"),
-  partValidator,
+  createPartValidator,
   createPart
 );
 
@@ -38,7 +38,7 @@ router.put(
   authenticate,
   authorize("admin"),
   upload.single("image"),
-  partValidator,
+  updatePartValidator,
   updatePart
 );
 

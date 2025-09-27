@@ -34,16 +34,21 @@ export const createPart = async (req, res) => {
   }
 };
 
-// Get all Parts
+// Get all Parts (with optional name search)
 export const getAllParts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
+    const query = {};
+    if (req.query.name) {
+      query.name = { $regex: req.query.name, $options: "i" };
+    }
+
     const [parts, total] = await Promise.all([
-      Part.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
-      Part.countDocuments()
+      Part.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Part.countDocuments(query)
     ]);
 
     res.status(200).json({

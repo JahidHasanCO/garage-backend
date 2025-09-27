@@ -8,7 +8,7 @@ import {
 } from "../controllers/service.catalog.controller.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
 import { authorize } from "../middlewares/authorize.middleware.js";
-import { serviceCatalogValidator } from "../validators/service.catalog.validator.js";
+import { createServiceCatalogValidator, updateServiceCatalogValidator } from "../validators/service.catalog.validator.js";
 import multer from "multer";
 
 const storage = multer.memoryStorage();
@@ -24,7 +24,7 @@ router.get("/", getAllServices);
 router.get("/:id", getServiceById);
 
 // Admin-only endpoints
-router.post("/", authorize(["admin"]), upload.single("image"), serviceCatalogValidator, createService);
+router.post("/", authorize(["admin"]), upload.single("image"), createServiceCatalogValidator, createService);
 router.put("/:id", authorize(["admin"]), upload.single("image"), serviceCatalogValidator, updateService);
 router.delete("/:id", authorize(["admin"]), deleteService);
 

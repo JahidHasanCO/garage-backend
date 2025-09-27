@@ -8,7 +8,7 @@ import {
 } from "../controllers/service.package.controller.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
 import { authorize } from "../middlewares/authorize.middleware.js";
-import { servicePackageValidator } from "../validators/service.package.validator.js";
+import { createServicePackageValidator, updateServicePackageValidator } from "../validators/service.package.validator.js";
 import multer from "multer";
 
 const storage = multer.memoryStorage();
@@ -25,8 +25,8 @@ router.get("/", getAllServicePackages);
 router.get("/:id", getServicePackageById);
 
 // Admin-only endpoints
-router.post("/", authorize(["admin"]), upload.single("image"), servicePackageValidator, createServicePackage);
-router.put("/:id", authorize(["admin"]), upload.single("image"), servicePackageValidator, updateServicePackage);
+router.post("/", authorize(["admin"]), upload.single("image"), createServicePackageValidator, createServicePackage);
+router.put("/:id", authorize(["admin"]), upload.single("image"), updateServicePackageValidator, updateServicePackage);
 router.delete("/:id", authorize(["admin"]), deleteServicePackage);
 
 export default router;

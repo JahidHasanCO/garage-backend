@@ -59,14 +59,31 @@ export const createVehicle = async (req, res) => {
 };
 
 // Get all Vehicles
-export const getAllVehicles = async (_req, res) => {
+export const getAllVehicles = async (req, res) => {
   try {
-    const vehicles = await Vehicle.find()
+    const { page = 1, limit = 10, search = "" } = req.query;
+
+    // Build query for search
+    const query = {};
+    if (search) {
+      query.model = { $regex: search, $options: "i" };
+    }
+
+    const vehicles = await Vehicle.find(query)
       .populate("manufacturer", "name country")
       .populate("fuel_type", "title value")
-      .sort({ createdAt: -1 });
+      .sort({ model: 1 }) // Sort by model ascending
+      .skip((parseInt(page) - 1) * parseInt(limit))
+      .limit(parseInt(limit));
 
-    res.status(200).json(vehicles);
+    const total = await Vehicle.countDocuments(query);
+
+    res.status(200).json({
+      vehicles,
+      total,
+      page: parseInt(page),
+      pages: Math.ceil(total / parseInt(limit)),
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

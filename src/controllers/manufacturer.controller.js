@@ -33,10 +33,38 @@ export const createManufacturer = async (req, res) => {
 };
 
 // Get all Manufacturers
-export const getAllManufacturers = async (_req, res) => {
+export const getAllManufacturers = async (req, res) => {
   try {
-    const manufacturers = await Manufacturer.find().sort({ createdAt: -1 });
-    res.status(200).json(manufacturers);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // Name search
+    const search = req.query.search ? req.query.search.trim() : "";
+    const filter = search
+      ? { name: { $regex: search, $options: "i" } }
+      : {};
+
+    // Name sorting
+    let sort = { createdAt: -1 };
+    if (req.query.sortBy === "name") {
+      sort = { name: req.query.order === "desc" ? -1 : 1 };
+    }
+
+    const [manufacturers, total] = await Promise.all([
+      Manufacturer.find(filter)
+        .sort(sort)
+        .skip(skip)
+        .limit(limit),
+      Manufacturer.countDocuments(filter)
+    ]);
+
+    res.status(200).json({
+      data: manufacturers,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit)
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
