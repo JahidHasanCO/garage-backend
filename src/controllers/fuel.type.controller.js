@@ -26,10 +26,23 @@ export const createFuelType = async (req, res) => {
 };
 
 // Get all FuelTypes
-export const getAllFuelTypes = async (_req, res) => {
+export const getAllFuelTypes = async (req, res) => {
   try {
-    const fuelTypes = await FuelType.find().sort({ createdAt: -1 });
-    res.status(200).json(fuelTypes);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const [fuelTypes, total] = await Promise.all([
+      FuelType.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
+      FuelType.countDocuments()
+    ]);
+
+    res.status(200).json({
+      data: fuelTypes,
+      total,
+      page,
+      pages: Math.ceil(total / limit)
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
