@@ -1,7 +1,8 @@
-import ServiceCatalog from "../models/service_catalog.model.js";
+import ServiceCatalog from "../models/service.catalog.model.js";
+import Part from "../models/part.model.js";
 import { uploadToCloudinary } from "../utils/helpers/cloudinary_upload.js";
 
-// Get all services with pagination
+// Get all services with pagination, populate parts
 export const getAllServices = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -9,7 +10,10 @@ export const getAllServices = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const [services, total] = await Promise.all([
-      ServiceCatalog.find().skip(skip).limit(limit),
+      ServiceCatalog.find()
+        .populate("parts_needed") // populate parts
+        .skip(skip)
+        .limit(limit),
       ServiceCatalog.countDocuments()
     ]);
 
@@ -25,10 +29,10 @@ export const getAllServices = async (req, res) => {
   }
 };
 
-// Get service by ID
+// Get service by ID, populate parts
 export const getServiceById = async (req, res) => {
   try {
-    const service = await ServiceCatalog.findById(req.params.id);
+    const service = await ServiceCatalog.findById(req.params.id).populate("parts_needed");
     if (!service) return res.status(404).json({ error: "Service not found" });
     res.json(service);
   } catch (err) {
@@ -37,36 +41,39 @@ export const getServiceById = async (req, res) => {
   }
 };
 
+// Create service
 export const createService = async (req, res) => {
   try {
-    const { name, description, price, estimated_time, discount } = req.body;
+    const { name, description, price, estimated_time, discount, parts_needed } = req.body;
 
-    if (!name || !description || !price || !estimated_time) {
-      return res.status(400).json({ error: "Name, description, price, and estimated_time are required" });
+    if (!name || !price || !estimated_time) {
+      return res.status(400).json({ error: "Name, price, and estimated_time are required" });
     }
 
-    // Optional: check if service with same name exists
-    const existingService = await ServiceCatalog.findOne({ name });
-    if (existingService) {
-      return res.status(400).json({ error: "Service already exists" });
-    }
-
-    // Upload image to Cloudinary if file is present
     let imageUrl = null;
     if (req.file) {
       imageUrl = await uploadToCloudinary(req.file.buffer, "services");
     }
 
+    // Validate parts if provided
+    let partsArray = [];
+    if (parts_needed && Array.isArray(parts_needed)) {
+      partsArray = await Part.find({ _id: { $in: parts_needed } });
+    }
+
     const newService = new ServiceCatalog({
       name,
-      description,
+      description: description || "",
       price,
       estimated_time,
       discount: discount || 0,
+      parts_needed: partsArray.map(p => p._id),
       image: imageUrl,
     });
 
     await newService.save();
+    await newService.populate("parts_needed");
+
     res.status(201).json(newService);
   } catch (err) {
     console.error(err);
@@ -74,12 +81,11 @@ export const createService = async (req, res) => {
   }
 };
 
-// Update service by ID
+// Update service
 export const updateService = async (req, res) => {
   try {
-    const { name, description, price, estimated_time, discount } = req.body;
+    const { name, description, price, estimated_time, discount, parts_needed } = req.body;
 
-    // Prepare update data
     const updateData = {
       name,
       description,
@@ -88,19 +94,23 @@ export const updateService = async (req, res) => {
       discount: discount || 0,
     };
 
-    // If a new image file is uploaded, upload to Cloudinary
     if (req.file) {
       updateData.image = await uploadToCloudinary(req.file.buffer, "services");
     } else if (req.body.image) {
-      // Optional: allow updating with an image URL directly
       updateData.image = req.body.image;
+    }
+
+    // Validate parts if provided
+    if (parts_needed && Array.isArray(parts_needed)) {
+      const partsArray = await Part.find({ _id: { $in: parts_needed } });
+      updateData.parts_needed = partsArray.map(p => p._id);
     }
 
     const service = await ServiceCatalog.findByIdAndUpdate(
       req.params.id,
       updateData,
-      { new: true } // return the updated document
-    );
+      { new: true }
+    ).populate("parts_needed");
 
     if (!service) return res.status(404).json({ error: "Service not found" });
 
@@ -111,7 +121,7 @@ export const updateService = async (req, res) => {
   }
 };
 
-// Delete service by ID
+// Delete service
 export const deleteService = async (req, res) => {
   try {
     const service = await ServiceCatalog.findByIdAndDelete(req.params.id);
