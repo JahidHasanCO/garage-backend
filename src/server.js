@@ -25,6 +25,7 @@ app.use(
     origin: [
       process.env.CLIENT_URL || "http://localhost:3000",
       "http://localhost:5173",
+      "https://garage-admin-delta.vercel.app/",
     ],
     credentials: true, // allow cookies / auth headers
   })
