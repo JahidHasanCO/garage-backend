@@ -42,10 +42,19 @@ export const getGarageById = async (req, res) => {
 // Create a new garage
 export const createGarage = async (req, res) => {
   try {
-    const { name, location, description } = req.body;
+    const {
+      name,
+      address,
+      city,
+      country,
+      geo,
+      contact,
+      supportedManufacturers,
+      supportedFuelTypes,
+    } = req.body;
 
-    if (!name || !location) {
-      return res.status(400).json({ error: "Name and location are required" });
+    if (!name || !address || !city) {
+      return res.status(400).json({ error: "Name, address, and city are required" });
     }
 
     let imageUrl = null;
@@ -55,8 +64,13 @@ export const createGarage = async (req, res) => {
 
     const newGarage = new Garage({
       name,
-      location,
-      description: description || "",
+      address,
+      city,
+      country: country || "Bangladesh",
+      geo: geo || {},
+      contact: contact || {},
+      supportedManufacturers: supportedManufacturers || [],
+      supportedFuelTypes: supportedFuelTypes || [],
       image: imageUrl,
     });
 
@@ -71,13 +85,27 @@ export const createGarage = async (req, res) => {
 // Update garage
 export const updateGarage = async (req, res) => {
   try {
-    const { name, location, description } = req.body;
-
-    const updateData = {
+    const {
       name,
-      location,
-      description,
-    };
+      address,
+      city,
+      country,
+      geo,
+      contact,
+      supportedManufacturers,
+      supportedFuelTypes,
+    } = req.body;
+
+    const updateData = {};
+
+    if (name !== undefined) updateData.name = name;
+    if (address !== undefined) updateData.address = address;
+    if (city !== undefined) updateData.city = city;
+    if (country !== undefined) updateData.country = country;
+    if (geo !== undefined) updateData.geo = geo;
+    if (contact !== undefined) updateData.contact = contact;
+    if (supportedManufacturers !== undefined) updateData.supportedManufacturers = supportedManufacturers;
+    if (supportedFuelTypes !== undefined) updateData.supportedFuelTypes = supportedFuelTypes;
 
     if (req.file) {
       updateData.image = await uploadToCloudinary(req.file.buffer, "garages");
