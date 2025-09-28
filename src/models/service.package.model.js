@@ -39,6 +39,13 @@ const servicePackageSchema = new mongoose.Schema(
         ref: "Manufacturer",
       }
     ],
+    garages: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Garage",
+        required: true,
+      },
+    ],
     image: {
       type: String, // URL of package image
       default: "",
@@ -46,6 +53,10 @@ const servicePackageSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+servicePackageSchema.index({ garages: 1 });
+servicePackageSchema.index({ applicableFuelTypes: 1 });
+servicePackageSchema.index({ applicableManufacturers: 1 });
 
 const ServicePackage = mongoose.model("ServicePackage", servicePackageSchema);
 export default ServicePackage;

@@ -14,6 +14,7 @@ import fuelTypeRoutes from "./routes/fuel.type.routes.js";
 import manufacturerRoutes from "./routes/manufacturer.routes.js";
 import partRoutes from "./routes/part.routes.js";
 import servicePackageRoutes from "./routes/service.package.routes.js";
+import garageRoutes from "./routes/garage.routes.js";
 
 import { connectDB } from "./config/db.js";
 
@@ -46,6 +47,7 @@ app.use("/fuel-types", fuelTypeRoutes);
 app.use("/manufacturers", manufacturerRoutes);
 app.use("/parts", partRoutes);
 app.use("/service-packages", servicePackageRoutes);
+app.use("/garages", garageRoutes);
 
 connectDB().then(() => {
   app.listen(process.env.PORT, () => {

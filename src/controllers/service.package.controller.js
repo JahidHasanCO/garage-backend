@@ -1,6 +1,7 @@
 import ServicePackage from "../models/service.package.model.js";
 import { uploadToCloudinary } from "../utils/helpers/cloudinary_upload.js";
 
+// Get all service packages with pagination, populate related fields
 export const getAllServicePackages = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -16,7 +17,8 @@ export const getAllServicePackages = async (req, res) => {
           populate: { path: "parts_needed" }
         })
         .populate("applicableFuelTypes")
-        .populate("applicableManufacturers"),
+        .populate("applicableManufacturers")
+        .populate("garages"),
       ServicePackage.countDocuments()
     ]);
 
@@ -41,7 +43,8 @@ export const getServicePackageById = async (req, res) => {
         populate: { path: "parts_needed" }
       })
       .populate("applicableFuelTypes")
-      .populate("applicableManufacturers");
+      .populate("applicableManufacturers")
+      .populate("garages");
 
     if (!pkg) return res.status(404).json({ error: "Package not found" });
     res.json(pkg);
@@ -51,10 +54,14 @@ export const getServicePackageById = async (req, res) => {
   }
 };
 
-// Create package
+// Create a new service package
 export const createServicePackage = async (req, res) => {
   try {
-    const { name, description, price, duration, services, applicableFuelTypes, applicableManufacturers } = req.body;
+    const { name, description, price, duration, services, applicableFuelTypes, applicableManufacturers, garages } = req.body;
+
+    if (!name || !price || !services || !garages) {
+      return res.status(400).json({ error: "Name, price, services, and garages are required" });
+    }
 
     let imageUrl = null;
     if (req.file) {
@@ -69,6 +76,7 @@ export const createServicePackage = async (req, res) => {
       services,
       applicableFuelTypes: applicableFuelTypes || [],
       applicableManufacturers: applicableManufacturers || [],
+      garages,
       image: imageUrl || "",
     });
 
@@ -76,7 +84,7 @@ export const createServicePackage = async (req, res) => {
     await newPackage.populate({
       path: "services",
       populate: { path: "parts_needed" }
-    });
+    }).populate("applicableFuelTypes applicableManufacturers garages");
 
     res.status(201).json(newPackage);
   } catch (err) {
@@ -85,10 +93,10 @@ export const createServicePackage = async (req, res) => {
   }
 };
 
-// Update package
+// Update service package
 export const updateServicePackage = async (req, res) => {
   try {
-    const { name, description, price, duration, services, applicableFuelTypes, applicableManufacturers } = req.body;
+    const { name, description, price, duration, services, applicableFuelTypes, applicableManufacturers, garages } = req.body;
 
     const updateData = {
       name,
@@ -98,6 +106,7 @@ export const updateServicePackage = async (req, res) => {
       services,
       applicableFuelTypes: applicableFuelTypes || [],
       applicableManufacturers: applicableManufacturers || [],
+      garages,
     };
 
     if (req.file) {
@@ -110,7 +119,8 @@ export const updateServicePackage = async (req, res) => {
       .populate({
         path: "services",
         populate: { path: "parts_needed" }
-      });
+      })
+      .populate("applicableFuelTypes applicableManufacturers garages");
 
     if (!pkg) return res.status(404).json({ error: "Package not found" });
     res.json(pkg);
@@ -120,7 +130,7 @@ export const updateServicePackage = async (req, res) => {
   }
 };
 
-// Delete package
+// Delete service package
 export const deleteServicePackage = async (req, res) => {
   try {
     const pkg = await ServicePackage.findByIdAndDelete(req.params.id);
