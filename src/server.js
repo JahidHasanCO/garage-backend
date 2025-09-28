@@ -25,11 +25,12 @@ app.use(
     origin: [
       process.env.CLIENT_URL || "http://localhost:3000",
       "http://localhost:5173",
-      "garage-admin-delta.vercel.app",
+      "https://garage-admin-delta.vercel.app",
     ],
-    credentials: true, // allow cookies / auth headers
+    credentials: true,
   })
 );
+
 app.use(express.json());
 app.use(cookieParser());
 
