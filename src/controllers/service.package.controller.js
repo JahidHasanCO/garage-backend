@@ -81,10 +81,15 @@ export const createServicePackage = async (req, res) => {
     });
 
     await newPackage.save();
-    await newPackage.populate({
-      path: "services",
-      populate: { path: "parts_needed" }
-    }).populate("applicableFuelTypes applicableManufacturers garages");
+    await newPackage.populate([
+      {
+        path: "services",
+        populate: { path: "parts_needed" }
+      },
+      { path: "applicableFuelTypes" },
+      { path: "applicableManufacturers" },
+      { path: "garages" }
+    ]);
 
     res.status(201).json(newPackage);
   } catch (err) {
