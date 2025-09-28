@@ -50,11 +50,6 @@ export const createService = async (req, res) => {
       return res.status(400).json({ error: "Name, price, and estimated_time are required" });
     }
 
-    const existingService = await ServiceCatalog.findOne({ name });
-    if (existingService) {
-      return res.status(400).json({ error: "Service already exists" });
-    }
-
     let imageUrl = null;
     if (req.file) {
       imageUrl = await uploadToCloudinary(req.file.buffer, "services");
