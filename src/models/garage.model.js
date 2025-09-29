@@ -10,6 +10,17 @@ const garageSchema = new mongoose.Schema(
       lat: { type: Number },
       lng: { type: Number },
     },
+    location: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number], 
+        required: true,
+      },
+    },
     contact: {
       phone: { type: String },
       email: { type: String },
@@ -29,6 +40,19 @@ const garageSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+garageSchema.index({ location: "2dsphere" });
+
+// Middleware to sync geo.lat/lng → location.coordinates
+garageSchema.pre("save", function (next) {
+  if (this.geo.lat && this.geo.lng) {
+    this.location = {
+      type: "Point",
+      coordinates: [this.geo.lng, this.geo.lat],
+    };
+  }
+  next();
+});
 
 const Garage = mongoose.model("Garage", garageSchema);
 export default Garage;

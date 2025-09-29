@@ -6,6 +6,7 @@ import {
   createGarage,
   updateGarage,
   deleteGarage,
+  getGaragesByLocation, 
 } from "../controllers/garage.controller.js";
 
 import { authenticate } from "../middlewares/auth.middleware.js";
@@ -24,6 +25,8 @@ router.use(authenticate);
 // Public endpoints
 router.get("/", getAllGarages);
 router.get("/:id", getGarageById);
+
+router.get("/nearby", getGaragesByLocation);
 
 // Admin-only endpoints
 router.post("/", authorize(["admin"]), upload.single("image"), createGarageValidator, createGarage);

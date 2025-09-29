@@ -27,6 +27,43 @@ export const getAllGarages = async (req, res) => {
   }
 };
 
+// Get garages sorted by nearest location
+export const getGaragesByLocation = async (req, res) => {
+  try {
+    // Expect latitude & longitude in query params
+    const { lat, lng, limit = 10, skip = 0 } = req.query;
+
+    if (!lat || !lng) {
+      return res.status(400).json({ error: "Latitude (lat) and Longitude (lng) are required" });
+    }
+
+    // Convert to numbers
+    const userLat = parseFloat(lat);
+    const userLng = parseFloat(lng);
+
+    const garages = await Garage.aggregate([
+      {
+        $geoNear: {
+          near: { type: "Point", coordinates: [userLng, userLat] },
+          distanceField: "distance",   // This will store distance in meters
+          spherical: true,
+        },
+      },
+      { $skip: parseInt(skip) },
+      { $limit: parseInt(limit) },
+    ]);
+
+    res.json({
+      garages,
+      count: garages.length,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+
 // Get garage by ID
 export const getGarageById = async (req, res) => {
   try {
@@ -67,7 +104,9 @@ export const createGarage = async (req, res) => {
       address,
       city,
       country: country || "Bangladesh",
-      geo: geo || {},
+      ...(geo && geo.lat && geo.lng
+        ? { location: { type: "Point", coordinates: [geo.lng, geo.lat] } }
+        : {}),
       contact: contact || {},
       supportedManufacturers: supportedManufacturers || [],
       supportedFuelTypes: supportedFuelTypes || [],
@@ -107,6 +146,10 @@ export const updateGarage = async (req, res) => {
     if (supportedManufacturers !== undefined) updateData.supportedManufacturers = supportedManufacturers;
     if (supportedFuelTypes !== undefined) updateData.supportedFuelTypes = supportedFuelTypes;
 
+    if (geo && geo.lat && geo.lng) {
+      updateData.location = { type: "Point", coordinates: [geo.lng, geo.lat] };
+    }
+
     if (req.file) {
       updateData.image = await uploadToCloudinary(req.file.buffer, "garages");
     } else if (req.body.image) {
@@ -116,7 +159,7 @@ export const updateGarage = async (req, res) => {
     const garage = await Garage.findByIdAndUpdate(
       req.params.id,
       updateData,
-      { new: true }
+      { new: true, runValidators: true }
     );
 
     if (!garage) return res.status(404).json({ error: "Garage not found" });
