@@ -40,6 +40,9 @@ export const getAllServicePackages = async (req, res) => {
 export const getNearbyServicePackages = async (req, res) => {
   try {
     const { lat, lng, manufacturerId, fuelTypeId } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
 
     if (!lat || !lng) {
       return res.status(400).json({ error: "Latitude (lat) and Longitude (lng) are required" });
@@ -70,8 +73,13 @@ export const getNearbyServicePackages = async (req, res) => {
       packageQuery.applicableFuelTypes = fuelTypeId;
     }
 
-    // Find all matching packages
+    // Get total count for pagination
+    const total = await ServicePackage.countDocuments(packageQuery);
+
+    // Find all matching packages with pagination
     const packages = await ServicePackage.find(packageQuery)
+      .skip(skip)
+      .limit(limit)
       .populate({
         path: "services",
         populate: { path: "parts_needed" }
@@ -91,7 +99,12 @@ export const getNearbyServicePackages = async (req, res) => {
       return { ...pkg.toObject(), nearestGarage };
     });
 
-    res.json({ packages: sortedPackages });
+    res.json({
+      packages: sortedPackages,
+      total,
+      page,
+      pages: Math.ceil(total / limit)
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
