@@ -24,9 +24,8 @@ router.use(authenticate);
 
 // Public endpoints
 router.get("/", getAllGarages);
+router.get("/nearby", getGaragesByLocation); // Must come before /:id
 router.get("/:id", getGarageById);
-
-router.get("/nearby", getGaragesByLocation);
 
 // Admin-only endpoints
 router.post("/", authorize(["admin"]), upload.single("image"), createGarageValidator, createGarage);

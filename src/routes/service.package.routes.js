@@ -25,8 +25,8 @@ router.use(authenticate);
 
 // Public endpoints (any authenticated user)
 router.get("/", getAllServicePackages); // supports pagination: ?page=1&limit=10
-router.get("/:id", getServicePackageById);
 router.get("/nearby", getNearbyServicePackages);
+router.get("/:id", getServicePackageById);
 
 // Admin-only endpoints
 router.post(
