@@ -9,8 +9,9 @@ const partSchema = new mongoose.Schema(
     },
     sku: {
       type: String,
-      unique: true,
       trim: true,
+      unique: true,
+      sparse: true, // Allows multiple documents with null/undefined sku
     },
     description: {
       type: String,
@@ -28,6 +29,9 @@ const partSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Create a sparse unique index on sku to allow multiple null values
+partSchema.index({ sku: 1 }, { unique: true, sparse: true });
 
 const Part = mongoose.model("Part", partSchema);
 export default Part;

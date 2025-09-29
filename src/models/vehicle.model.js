@@ -31,7 +31,6 @@ const vehicleSchema = new mongoose.Schema(
     },
     license_plate: {
       type: String,
-      required: true,
       trim: true,
       uppercase: true,
       match: /^[A-Z0-9-]{3,10}$/, // basic license plate validation
