@@ -31,7 +31,10 @@ export const getAllGarages = async (req, res) => {
 export const getGaragesByLocation = async (req, res) => {
   try {
     // Expect latitude & longitude in query params
-    const { lat, lng, limit = 10, skip = 0 } = req.query;
+    const { lat, lng } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
 
     if (!lat || !lng) {
       return res.status(400).json({ error: "Latitude (lat) and Longitude (lng) are required" });
@@ -41,21 +44,37 @@ export const getGaragesByLocation = async (req, res) => {
     const userLat = parseFloat(lat);
     const userLng = parseFloat(lng);
 
+    // Get total count of garages near the location (without skip/limit)
+    const totalGarages = await Garage.aggregate([
+      {
+        $geoNear: {
+          near: { type: "Point", coordinates: [userLng, userLat] },
+          distanceField: "distance",
+          spherical: true,
+        },
+      },
+      { $count: "total" }
+    ]);
+    const total = totalGarages[0]?.total || 0;
+
+    // Get paginated garages
     const garages = await Garage.aggregate([
       {
         $geoNear: {
           near: { type: "Point", coordinates: [userLng, userLat] },
-          distanceField: "distance",   // This will store distance in meters
+          distanceField: "distance",
           spherical: true,
         },
       },
-      { $skip: parseInt(skip) },
-      { $limit: parseInt(limit) },
+      { $skip: skip },
+      { $limit: limit },
     ]);
 
     res.json({
       garages,
-      count: garages.length,
+      total,
+      page,
+      pages: Math.ceil(total / limit),
     });
   } catch (err) {
     console.error(err);
