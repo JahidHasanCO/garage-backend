@@ -1,14 +1,62 @@
 import mongoose from "mongoose";
 
-const bookingSchema = new mongoose.Schema({
-    customer_id : {type: mongoose.Schema.Types.ObjectId, ref: 'Customer', required: true},
-    vehicle_id : {type: mongoose.Schema.Types.ObjectId, ref: 'Vehicle', required: true},
-    service_id : {type: mongoose.Schema.Types.ObjectId, ref: 'Service', required: true},
-    booking_date : {type: Date, required: true},
-    status : {type: String, enum: ['pending', 'confirmed', 'completed', 'cancelled'], default: 'pending'},
-    notes : {type: String},
-}, { timestamps: true }); 
+const bookingSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Customer",
+      required: true,
+    },
+    servicePackage: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ServicePackage",
+    },
+    singleService: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Service",
+    },
+
+    garage: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Garage",
+      required: true,
+    },
+
+    assignedStaff: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Staff", // could also be User with role=staff
+    },
+
+    status: {
+      type: String,
+      enum: [
+        "requested",   // user requested
+        "assigned",    // admin assigned staff
+        "in_progress", // staff started
+        "completed",   // staff marked done
+        "paid",        // user paid
+        "cancelled"
+      ],
+      default: "requested",
+    },
+
+    // Payment info
+    payment: {
+      status: {
+        type: String,
+        enum: ["pending", "paid", "failed"],
+        default: "pending",
+      },
+      method: { type: String }, // cash, card, bkash, etc
+      transactionId: { type: String },
+      amount: { type: Number, required: true },
+    },
+
+    requestedAt: { type: Date, default: Date.now },
+    completedAt: { type: Date },
+  },
+  { timestamps: true }
+);
 
 const Booking = mongoose.model("Booking", bookingSchema);
-
 export default Booking;
