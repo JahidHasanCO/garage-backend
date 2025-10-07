@@ -146,8 +146,25 @@ export const updateStaff = async (req, res) => {
 // Delete staff
 export const deleteStaff = async (req, res) => {
   try {
-    const staff = await Staff.findByIdAndDelete(req.params.id);
+    // Find staff first so we have access to linked user_id
+    const staff = await Staff.findById(req.params.id);
     if (!staff) return res.status(404).json({ error: "Staff not found" });
+
+    const linkedUserId = staff.user_id;
+
+    // Delete staff record
+    await Staff.findByIdAndDelete(req.params.id);
+
+    // Best-effort: delete associated User as well (if exists)
+    try {
+      if (linkedUserId) {
+        await User.findByIdAndDelete(linkedUserId);
+      }
+    } catch (userDelErr) {
+      console.error('Failed to delete linked user after staff deletion:', userDelErr);
+      // proceed — staff is already deleted
+    }
+
     res.json({ message: "Staff deleted successfully" });
   } catch (err) {
     console.error(err);
