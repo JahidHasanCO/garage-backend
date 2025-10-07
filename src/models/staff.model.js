@@ -20,13 +20,6 @@ const staffSchema = new mongoose.Schema(
       default: "mechanic",
     },
 
-    skills: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Service",
-      },
-    ],
-
     status: {
       type: String,
       enum: ["available", "busy", "inactive"],

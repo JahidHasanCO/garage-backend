@@ -24,15 +24,13 @@ export const createStaffValidator = (req, res, next) => {
     return res.status(400).json({ message: "Invalid status" });
   }
 
-  if (skills !== undefined && !Array.isArray(skills)) {
-    return res.status(400).json({ message: "skills must be an array" });
-  }
+  // skills removed
 
   next();
 };
 
 export const updateStaffValidator = (req, res, next) => {
-  const { role, status, skills, isActive } = req.body;
+  const { role, status, isActive } = req.body;
 
   if (role !== undefined && !["mechanic", "technician", "cleaner", "manager", "support"].includes(role)) {
     return res.status(400).json({ message: "Invalid role" });
@@ -42,9 +40,7 @@ export const updateStaffValidator = (req, res, next) => {
     return res.status(400).json({ message: "Invalid status" });
   }
 
-  if (skills !== undefined && !Array.isArray(skills)) {
-    return res.status(400).json({ message: "skills must be an array" });
-  }
+  // skills removed
 
   if (isActive !== undefined && typeof isActive !== "boolean") {
     return res.status(400).json({ message: "isActive must be boolean" });

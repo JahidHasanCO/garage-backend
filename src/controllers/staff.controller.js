@@ -39,8 +39,7 @@ export const getStaffById = async (req, res) => {
   try {
     const staff = await Staff.findById(req.params.id)
       .populate("user_id", "name email")
-      .populate("garage", "name")
-      .populate("skills");
+      .populate("garage", "name");
 
     if (!staff) return res.status(404).json({ error: "Staff not found" });
     res.json(staff);
@@ -54,7 +53,7 @@ export const getStaffById = async (req, res) => {
 export const createStaff = async (req, res) => {
   try {
     // Expect user info to be provided to create an associated User
-    const { name, email, password, user_id, garage, role, skills, status, isActive } = req.body;
+  const { name, email, password, user_id, garage, role, status, isActive } = req.body;
 
     let linkedUserId = user_id;
 
@@ -92,13 +91,12 @@ export const createStaff = async (req, res) => {
       user_id: linkedUserId,
       garage,
       role,
-      skills: Array.isArray(skills) ? skills : [],
       status,
       isActive: isActive !== undefined ? isActive : true,
     });
 
     await newStaff.save();
-    const populated = await Staff.findById(newStaff._id).populate("user_id", "name email").populate("garage", "name").populate("skills");
+  const populated = await Staff.findById(newStaff._id).populate("user_id", "name email").populate("garage", "name");
     res.status(201).json(populated);
   } catch (err) {
     console.error(err);
@@ -125,19 +123,17 @@ export const createStaff = async (req, res) => {
 // Update staff
 export const updateStaff = async (req, res) => {
   try {
-    const updateData = {};
-    const { user_id, garage, role, skills, status, isActive } = req.body;
+  const updateData = {};
+  const { user_id, garage, role, status, isActive } = req.body;
     if (user_id !== undefined) updateData.user_id = user_id;
     if (garage !== undefined) updateData.garage = garage;
     if (role !== undefined) updateData.role = role;
-    if (skills !== undefined) updateData.skills = skills;
     if (status !== undefined) updateData.status = status;
     if (isActive !== undefined) updateData.isActive = isActive;
 
     const staff = await Staff.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true })
-      .populate("user_id", "name email")
-      .populate("garage", "name")
-      .populate("skills");
+  .populate("user_id", "name email")
+  .populate("garage", "name");
 
     if (!staff) return res.status(404).json({ error: "Staff not found" });
     res.json(staff);
