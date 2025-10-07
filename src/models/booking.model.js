@@ -13,13 +13,18 @@ const bookingSchema = new mongoose.Schema(
     },
     singleService: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Service",
+      ref: "ServiceCatalog",
     },
 
     garage: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Garage",
       required: true,
+    },
+
+    vehicle: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Vehicle",
     },
 
     assignedStaff: {

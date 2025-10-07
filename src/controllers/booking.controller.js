@@ -33,7 +33,7 @@ export const getMyBookings = async (req, res) => {
 export const createBooking = async (req, res) => {
     try {
         // Accept either servicePackage or singleService. If request is from a customer, associate their customer record.
-        const { customer_id, servicePackage, singleService, garage, assignedStaff, payment, requestedAt, notes } = req.body;
+    const { customer_id, servicePackage, singleService, garage, vehicle, assignedStaff, payment, requestedAt, notes } = req.body;
 
         let userRef = customer_id;
         if (!userRef && req.user && req.user.role === 'customer') {
@@ -47,6 +47,7 @@ export const createBooking = async (req, res) => {
             servicePackage: servicePackage || null,
             singleService: singleService || null,
             garage,
+            vehicle: vehicle || null,
             assignedStaff: assignedStaff || null,
             payment: payment || {},
             requestedAt: requestedAt || Date.now(),
@@ -63,7 +64,7 @@ export const createBooking = async (req, res) => {
 // Get booking by ID
 export const getBookingById = async (req, res) => {
     try {
-        const booking = await Booking.findById(req.params.id).populate('garage').populate('assignedStaff').populate('servicePackage').populate('singleService');
+    const booking = await Booking.findById(req.params.id).populate('garage').populate('vehicle').populate('assignedStaff').populate('servicePackage').populate('singleService');
         if (!booking) return res.status(404).json({ error: "Booking not found" });
 
         // validate if the user is the owner of the booking or an admin
@@ -105,12 +106,13 @@ export const cancelBooking = async (req, res) => {
 // Update booking
 export const updateBooking = async (req, res) => {
     try {
-        const { servicePackage, singleService, garage, assignedStaff, status, payment, requestedAt, completedAt, notes } = req.body;
+    const { servicePackage, singleService, garage, vehicle, assignedStaff, status, payment, requestedAt, completedAt, notes } = req.body;
         const booking = await Booking.findById(req.params.id);
         if (!booking) return res.status(404).json({ error: "Booking not found" });
         if (servicePackage !== undefined) booking.servicePackage = servicePackage;
         if (singleService !== undefined) booking.singleService = singleService;
         if (garage !== undefined) booking.garage = garage;
+    if (vehicle !== undefined) booking.vehicle = vehicle;
         if (assignedStaff !== undefined) booking.assignedStaff = assignedStaff;
         if (status !== undefined) booking.status = status;
         if (payment !== undefined) booking.payment = payment;
@@ -127,7 +129,7 @@ export const updateBooking = async (req, res) => {
         }
 
         await booking.save();
-        const populated = await Booking.findById(booking._id).populate('garage').populate('assignedStaff').populate('servicePackage').populate('singleService');
+    const populated = await Booking.findById(booking._id).populate('garage').populate('vehicle').populate('assignedStaff').populate('servicePackage').populate('singleService');
         res.json(populated);
     } catch (err) {
         console.error(err);
